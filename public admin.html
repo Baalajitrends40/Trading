@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Admin — Add Client</title>
+  <style>
+    body{font-family:Arial, sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0f172a;color:#f1f5f9}
+    .card{background:#1e293b;padding:30px;border-radius:12px;box-shadow:0 0 25px rgba(0,0,0,0.5);width:350px}
+    h2{text-align:center;color:#60a5fa}
+    input,button{width:100%;padding:10px;margin:8px 0;border-radius:8px;border:none}
+    input{background:#334155;color:white}
+    button{background:#2563eb;color:white;font-weight:bold;cursor:pointer}
+    button:hover{background:#1d4ed8}
+    #msg{text-align:center;margin-top:10px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Admin Panel</h2>
+    <input id="token" placeholder="Admin Token" type="password" required/>
+    <hr/>
+    <input id="userid" placeholder="New Client ID" required/>
+    <input id="userpass" placeholder="Client Password" type="password" required/>
+    <button id="addBtn">Add Client</button>
+    <p id="msg"></p>
+  </div>
+
+  <script>
+    const msg = document.getElementById('msg');
+    document.getElementById('addBtn').addEventListener('click', async ()=>{
+      const token = document.getElementById('token').value.trim();
+      const id = document.getElementById('userid').value.trim();
+      const pass = document.getElementById('userpass').value.trim();
+
+      if(!token || !id || !pass){
+        msg.textContent = "Please fill all fields.";
+        msg.style.color = "#f87171";
+        return;
+      }
+
+      msg.textContent = "Processing...";
+      msg.style.color = "#facc15";
+
+      try{
+        const res = await fetch('/admin/add-user', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-admin-token': token
+          },
+          body: JSON.stringify({ id, password: pass })
+        });
+        const data = await res.json();
+        if(data.ok){
+          msg.textContent = "✅ Client added successfully!";
+          msg.style.color = "#4ade80";
+          document.getElementById('userid').value='';
+          document.getElementById('userpass').value='';
+        } else {
+          msg.textContent = "❌ " + (data.msg || 'Error occurred');
+          msg.style.color = "#f87171";
+        }
+      } catch(e){
+        msg.textContent = "⚠️ Connection error";
+        msg.style.color = "#f87171";
+      }
+    });
+  </script>
+</body>
+</html>
